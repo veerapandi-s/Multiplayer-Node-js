@@ -1,0 +1,15 @@
+{
+  "name": "golf_game_test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@colyseus/monitor": "^0.14.22",
+    "colyseus": "^0.14.23",
+    "express": "^4.18.1",
+    "http": "^0.0.1-security"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13"
+  }
+}
