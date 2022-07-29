@@ -45,7 +45,7 @@ export class GameRoom extends Room<GameState> {
 
   // Called every time a client joins
   onJoin(client: Client, options: any) {
-    if (this.clients.length == 2) {
+    if (this.clients.length == this.maxClients) {
       const nextPlayer = new Player();
       nextPlayer.x = 800;
       nextPlayer.y = 200;
@@ -65,6 +65,10 @@ export class GameRoom extends Room<GameState> {
       }
       this.broadcast('ready', { result: toSendData });
     } else {
+      const nextPlayer = new Player();
+      nextPlayer.x = 800;
+      nextPlayer.y = 200;
+      nextPlayer.avatar = 'https://image.similarpng.com/very-thumbnail/2020/08/Yellow-ball-on-transparent-background-PNG.png';
       this.state.players.set(client.sessionId, new Player());
     }
 

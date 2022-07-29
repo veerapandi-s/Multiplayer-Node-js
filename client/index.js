@@ -1,6 +1,5 @@
 let clientInstance = new Colyseus.Client('ws://localhost:2567');
 let roomState;
-let sampleState;
 
 function init() {
     clientInstance.joinOrCreate("golf").then(room => {
@@ -12,21 +11,41 @@ function init() {
     });
 }
 
-function gameReady(gameState) {
+function gameReady(gameState, myId) {
+    let playerIndex = 1;
     for (let index = 0; index < gameState.length; index++) {
         const element = gameState[index];
-        renderImage(element.id, element.avatar, element.x, element.y);
+        let title = 'Player' + playerIndex;
+        if(element.id == myId) {
+            title = 'mine';
+        } else {
+            playerIndex++;
+        }
+        renderImage(element.id, element.avatar, element.x, element.y,title);
+
     }
 }
 
-function renderImage(id, image, x, y) {
+function renderImage(id, image, x, y,text) {
     const gameBoard = document.getElementById('game-board');
     const img = document.createElement('img');
     img.src = image;
-    img.id = id;
+    img.id = 'img' + id;
     img.width = 100;
     img.height = 100;
-    gameBoard.appendChild(img);
+    const name = document.createElement('p');
+    name.innerText = text;
+    const divImage = document.createElement('div');
+    divImage.classList.add('img-with-text');
+    divImage.appendChild(img);
+    divImage.appendChild(name);
+    divImage.id = id;
+//     <div class="img-with-text">
+//     <img src="yourimage.jpg" alt="sometext" />
+//     <p>Some text</p>
+// </div>
+
+    gameBoard.appendChild(divImage);
     moveImage(id,x,y);
 }
 
@@ -35,19 +54,15 @@ function moveImage(id, x, y) {
     el.css('position', 'absolute');
     el.css("left", x);
     el.css("top", y);
-    console.log("pos", x, y)
 }
 
 function registerListener(roomInstance) {
     if (!roomInstance) return null;
-
+    
+        
     roomInstance.onMessage('ready', (message) => {
         console.log("All user joind : ", message);
-        gameReady(message.result)
-    });
-
-    roomInstance.onMessage('onMove', (message) => {
-        console.log("Message is : ", message);
+        gameReady(message.result, roomInstance.sessionId);
     });
 
     roomInstance.onStateChange((state) => {
@@ -64,11 +79,6 @@ function registerListener(roomInstance) {
             }
             moveImage(id,element.x,element.y);
         }
-        // state.players.forEach(element => {
-        //     console.log(element.x, element.y);
-        //     // console.log("POS Y is", element.x);
-        // });
-        sampleState = state;
     });
 }
 
