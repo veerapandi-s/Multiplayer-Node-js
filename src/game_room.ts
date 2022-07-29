@@ -1,5 +1,7 @@
 import { Room, Client } from "colyseus";
 import { Schema, MapSchema, type } from "@colyseus/schema";
+import { plyarInitailState } from "./default";
+
 
 // An abstract player object, demonstrating a potential 2D world position
 export class Player extends Schema {
@@ -45,12 +47,14 @@ export class GameRoom extends Room<GameState> {
 
   // Called every time a client joins
   onJoin(client: Client, options: any) {
+    const playerDefaultStates = plyarInitailState[this.clients.length-1];
+    const playerInitialState = new Player();
+    playerInitialState.x = playerDefaultStates.x;
+    playerInitialState.y = playerDefaultStates.y;
+    playerInitialState.avatar = playerDefaultStates.avatar;
+
     if (this.clients.length == this.maxClients) {
-      const nextPlayer = new Player();
-      nextPlayer.x = 800;
-      nextPlayer.y = 200;
-      nextPlayer.avatar = 'https://image.similarpng.com/very-thumbnail/2020/08/Yellow-ball-on-transparent-background-PNG.png';
-      this.state.players.set(client.sessionId, nextPlayer);
+      this.state.players.set(client.sessionId, playerInitialState);
       let toSendData = [];
       for (let index = 0; index < this.clients.length; index++) {
         const element = this.clients[index];
@@ -65,11 +69,7 @@ export class GameRoom extends Room<GameState> {
       }
       this.broadcast('ready', { result: toSendData });
     } else {
-      const nextPlayer = new Player();
-      nextPlayer.x = 800;
-      nextPlayer.y = 200;
-      nextPlayer.avatar = 'https://image.similarpng.com/very-thumbnail/2020/08/Yellow-ball-on-transparent-background-PNG.png';
-      this.state.players.set(client.sessionId, new Player());
+      this.state.players.set(client.sessionId, playerInitialState);
     }
 
   }
