@@ -6,25 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/colyseus.js@^0.14.0/dist/colyseus.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="index.css">
 
-    <script src="./index.js"></script>
     <title>Game Test</title>
 </head>
-<style>
-    .img-with-text {
-    text-align: justify;
-    width: [width of img];
-}
 
-.img-with-text img {
-    display: block;
-    margin: 0 auto;
-}
-</style>
 
 <body>
+    <button id="join-button" onclick="joinRoom()" class="center-me">Join</button>
+    <h1 id="wait-text" class="center-me" style="display: none;"> Waiting for other players </h1>
     <div id="game-board">
-
-
+    <script src="./index.js"></script>
 </body>
 </html>

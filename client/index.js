@@ -1,12 +1,27 @@
 let clientInstance = new Colyseus.Client('ws://localhost:2567');
 let roomState;
 
-function init() {
+
+
+function hideElementByID(id) {
+    const elementRef = document.getElementById(id);
+    elementRef.style.display = 'none';
+}
+
+function showElementByID(id) {
+    const elementRef = document.getElementById(id);
+    elementRef.style.display = 'block'; 
+}
+
+function joinRoom() {
     clientInstance.joinOrCreate("golf").then(room => {
         roomState = room;
         console.log(room.sessionId, "joined", room.name);
+        showElementByID('wait-text');
+        hideElementByID('join-button');
         registerListener(room);
     }).catch(e => {
+        alert("Couldn't join the match");
         console.log("JOIN create ERROR", e);
     });
 }
@@ -16,17 +31,19 @@ function gameReady(gameState, myId) {
     for (let index = 0; index < gameState.length; index++) {
         const element = gameState[index];
         let title = 'Player' + playerIndex;
-        if(element.id == myId) {
+        if (element.id == myId) {
             title = 'mine';
         } else {
             playerIndex++;
         }
-        renderImage(element.id, element.avatar, element.x, element.y,title);
+        hideElementByID('wait-text');
+        hideElementByID('join-button');
+        renderImage(element.id, element.avatar, element.x, element.y, title);
 
     }
 }
 
-function renderImage(id, image, x, y,text) {
+function renderImage(id, image, x, y, text) {
     const gameBoard = document.getElementById('game-board');
     const img = document.createElement('img');
     img.src = image;
@@ -40,13 +57,8 @@ function renderImage(id, image, x, y,text) {
     divImage.appendChild(img);
     divImage.appendChild(name);
     divImage.id = id;
-//     <div class="img-with-text">
-//     <img src="yourimage.jpg" alt="sometext" />
-//     <p>Some text</p>
-// </div>
-
     gameBoard.appendChild(divImage);
-    moveImage(id,x,y);
+    moveImage(id, x, y);
 }
 
 function moveImage(id, x, y) {
@@ -54,17 +66,31 @@ function moveImage(id, x, y) {
     el.css('position', 'absolute');
     el.css("left", x);
     el.css("top", y);
+    // const ele = document.getElementById(id);
+    // if(!ele) return null; 
+    // ele.style.position = 'absolute';
+    // ele.style.left = x;
+    // ele.style.top = y;
+    
 }
 
 function registerListener(roomInstance) {
     if (!roomInstance) return null;
-    
-        
+
+    // Event will be fired once the All Players are joined
     roomInstance.onMessage('ready', (message) => {
         console.log("All user joind : ", message);
         gameReady(message.result, roomInstance.sessionId);
     });
 
+    // Event will be fired once the Any Player Left the room
+    roomInstance.onMessage('playerLeft', (message) => {
+        alert(`Player Left the Room with id ${message.id}`);
+        window.location.reload();
+        console.log(message);
+    });
+
+    // Event will be fired All State Changes
     roomInstance.onStateChange((state) => {
         let playerEntries = Array.from(state.players.entries());
         let players = [];
@@ -77,7 +103,7 @@ function registerListener(roomInstance) {
             } else {
                 console.log(`Other Player Location is : ${id}`, element.x, element.y);
             }
-            moveImage(id,element.x,element.y);
+            moveImage(id, element.x, element.y);
         }
     });
 }
@@ -92,4 +118,3 @@ window.addEventListener("click", function (event) {
     }
 });
 
-init();

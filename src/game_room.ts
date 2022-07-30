@@ -75,6 +75,7 @@ export class GameRoom extends Room<GameState> {
   }
 
   onLeave(client: Client) {
+    this.broadcast('playerLeft', { id : client.sessionId });
     if (this.state.players.has(client.sessionId)) {
       this.state.players.delete(client.sessionId);
     }
