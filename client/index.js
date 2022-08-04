@@ -13,12 +13,32 @@ function showElementByID(id) {
     elementRef.style.display = 'block'; 
 }
 
-function joinRoom() {
+async function joinRoom() {
+    const roomId = document.getElementById('room-id');
+    const sessionId = document.getElementById('session-id');
+    
+    if(roomId.value && sessionId.value) {
+        console.log(roomId.value);
+        console.log(sessionId.value);
+        try {
+            const room = await clientInstance.reconnect(roomId.value, sessionId.value);
+            roomState = room;
+        } catch (error) {
+            alert("Couldn't Re - Join the match");
+            console.log("RE-JOIN create ERROR", error);
+        }
+        
+        
+        return null;
+    
+    }
+    
     clientInstance.joinOrCreate("golf").then(room => {
         roomState = room;
         console.log(room.sessionId, "joined", room.name);
         showElementByID('wait-text');
         hideElementByID('join-button');
+        hideElementByID('form-data');
         registerListener(room);
     }).catch(e => {
         alert("Couldn't join the match");
@@ -38,6 +58,7 @@ function gameReady(gameState, myId) {
         }
         hideElementByID('wait-text');
         hideElementByID('join-button');
+        hideElementByID('form-data');
         renderImage(element.id, element.avatar, element.x, element.y, title);
 
     }

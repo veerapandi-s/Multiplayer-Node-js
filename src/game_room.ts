@@ -10,9 +10,12 @@ export class Player extends Schema {
 
   @type("number")
   y: number = 100;
-
+  
   @type("string")
   avatar: string = 'https://image.similarpng.com/very-thumbnail/2020/08/3D-soccer-ball-on-transparent-background-PNG.png';
+
+  @type('boolean')
+  connected: boolean = true;
 }
 
 // Our custom game state, an ArraySchema of type Player only at the moment
@@ -27,7 +30,7 @@ export class GameRoom extends Room<GameState> {
     // initialize empty room state
     this.setState(new GameState());
     this.maxClients = options.maxClients;
-
+    this.autoDispose = true;
     // Called every time this room receives a "move" message
     this.onMessage("onMove", (client, data) => {
       console.log("Data is : ", data);
@@ -52,6 +55,7 @@ export class GameRoom extends Room<GameState> {
     playerInitialState.x = playerDefaultStates.x;
     playerInitialState.y = playerDefaultStates.y;
     playerInitialState.avatar = playerDefaultStates.avatar;
+    playerInitialState.connected = true;
 
     if (this.clients.length == this.maxClients) {
       this.state.players.set(client.sessionId, playerInitialState);
@@ -73,12 +77,38 @@ export class GameRoom extends Room<GameState> {
     }
 
   }
-
-  onLeave(client: Client) {
-    this.broadcast('playerLeft', { id : client.sessionId });
-    if (this.state.players.has(client.sessionId)) {
-      this.state.players.delete(client.sessionId);
+  onDispose(){
+    for (let index = 0; index < this.clients.length; index++) {
+      const element = this.clients[index];
+      this.state.players.delete(element.id);
     }
+  }
+
+  async onLeave(client: Client, consented: boolean) {
+
+    this.state.players.get(client.sessionId).connected = false;
+    this.broadcast('playerLeft', { id : client.sessionId });
+
+    // // 20 seconds expired. let's remove the client.
+    this.state.players.delete(client.sessionId);
+    
+  //   try {
+  //     if (consented) {
+  //         throw new Error("consented leave");
+  //     }
+  
+  //     // allow disconnected client to reconnect into this room until 20 seconds
+  //     await this.allowReconnection(client, 360);
+  
+  //     // client returned! let's re-activate it.
+  //     this.state.players.get(client.sessionId).connected = true;
+  
+  //   } catch (e) {
+  //     this.broadcast('playerLeft', { id : client.sessionId });
+
+  //     // 20 seconds expired. let's remove the client.
+  //     this.state.players.delete(client.sessionId);
+  //   }
   }
 
 }

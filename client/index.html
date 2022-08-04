@@ -13,6 +13,14 @@
 
 
 <body>
+    <div id="form-data" style="display: none;">
+        <label for="room-id">Room Id</label>
+        <input type="text" name="room-id" id="room-id">
+        <br>
+        <label for="session-id">Session Id</label>
+        <input type="text" id="session-id" name="session-id">
+        <br>
+    </div>
     <button id="join-button" onclick="joinRoom()" class="center-me">Join</button>
     <h1 id="wait-text" class="center-me" style="display: none;"> Waiting for other players </h1>
     <div id="game-board">
